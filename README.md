@@ -15,7 +15,8 @@ and select the "Exploring [...].ipynb" notebook. Then you'll have to change the 
 `plot.py ../path/to/h5File.h5 --draw_boxes`
 
 ## Literature
-<https://arxiv.org/pdf/1602.04105.pdf>
+[O'Shea convolutional modulation recognition](https://arxiv.org/pdf/1602.04105.pdf)
+[O'Shea autoencoder signal identification](https://arxiv.org/pdf/1611.00303.pdf)
 
 ## Ideas
 Fit a one-class SVM. Example...
