@@ -19,5 +19,5 @@ and select the "Exploring [...].ipynb" notebook. Then you'll have to change the 
 
 ## Ideas
 
-# Fit a one-class SVM. Example...
+### Fit a one-class SVM. Example...
 https://scikit-learn.org/stable/auto_examples/svm/plot_oneclass.html#sphx-glr-auto-examples-svm-plot-oneclass-py
