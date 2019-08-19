@@ -14,3 +14,5 @@ and select the "Exploring [...].ipynb" notebook. Then you'll have to change the 
 
 `plot.py ../path/to/h5File.h5 --draw_boxes`
 
+## Literature
+<https://arxiv.org/pdf/1602.04105.pdf>
