@@ -6,8 +6,8 @@ from scipy.signal import lfilter, remez, freqz, spectrogram
 import matplotlib.pyplot as plt
 
 parser = argparse.ArgumentParser()
-parser.add_argument("h5", help="HDF5 File to parse.")
-parser.add_argument("raw", help="Raw data file.")
+parser.add_argument("--h5", help="HDF5 File to parse.")
+parser.add_argument("--raw", help="Raw data file.")
 args = parser.parse_args()
 
 h5 = h5py.File(args.h5, 'r+')
@@ -42,7 +42,7 @@ for i in np.arange(0, h5['merged_detections'].shape[1]):
         continue
 
     # Center frequency chan is average of y1, y2
-    fc = (y1+y2)/2.
+    fc = (y1+y2)/2. + y1 # I don't think it is.
     print('Center Freq (channels): %.2f' %(fc))
 
     # Bandwidth is y2-y1
