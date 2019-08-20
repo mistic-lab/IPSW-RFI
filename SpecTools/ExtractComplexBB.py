@@ -42,7 +42,7 @@ for i in np.arange(0, h5['merged_detections'].shape[1]):
         continue
 
     # Center frequency chan is average of y1, y2
-    fc = (y1+y2)/2. + y1 # I don't think it is.
+    fc = (y1+y2)/2.
     print('Center Freq (channels): %.2f' %(fc))
 
     # Bandwidth is y2-y1
