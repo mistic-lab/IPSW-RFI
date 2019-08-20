@@ -23,6 +23,10 @@ for filename in os.listdir('./waveforms'):
 X = torch.FloatTensor(X)
 X = X[:4398000]
 X = X.view(-1,500)
+
+#normalize
+X = (X-X.mean(dim=-1).unsqueeze(1))/X.std(dim=-1).unsqueeze(1)
+
 X_train = X[:7000]
 X_test = X[7000:]
 
@@ -78,19 +82,19 @@ class convautoencoder(nn.Module):
 #defining some stuff
 #num_epochs = 5
 #batch_size = 128
-model = linearautoencoder().cpu()
+model = convautoencoder().cpu()
 model.train()
 distance = nn.MSELoss()
-optimizer = torch.optim.SGD(model.parameters(),lr = 0.0000001)
+optimizer = torch.optim.Adam(model.parameters(),lr = 0.01)
 
 for epochs in range(1):
     losses = []
     for i in range(len(X_train)):
-        img = X_train[i]
-        img = Variable(img, requires_grad=True)
-        output = model(img)
-        loss = distance(output, img)
-        print('image {}, loss = {}'.format(i, loss.item()))
+        x = X_train[i]
+        x = Variable(x, requires_grad=True)
+        output = model(x)
+        loss = distance(output,x)
+        print('{}: loss = {}'.format(i, loss.item()))
         if math.isnan(loss.item()):
             exit()
         losses.append(loss.item())
