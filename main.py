@@ -9,7 +9,7 @@ import math
 from sklearn.decomposition import PCA, IncrementalPCA
 from sklearn.cluster import KMeans
 
-filename = '460MHz/1565294405.h5'
+filename = './data/1565289740_sample.h5'
 f = h5py.File(filename, 'r')
 #print(f.keys())
 features = f['features']
@@ -17,18 +17,32 @@ features = f['features']
 data = list(features)
 data = np.array(data)
 print("FEATURES: frequence (Hz), bandwidth (Hz), c42, c63, transmission time (s), received power (dB)")
-#print(data.mean(axis=1))
+print(data.shape)
 
-X = data.transpose()
-print(X.shape)
-n_components = 2
-pca = PCA(n_components=n_components)
-X_pca = pca.fit_transform(X)
-print(X_pca.shape)
+# Writing our model
+class Autoencoder(nn.Module):
+    def __init__(self):
+        super(Autoencoder,self).__init__()
+        self.encoder = nn.Sequential(
+            nn.Conv2d(3, 6, kernel_size=5),
+            nn.ReLU(True),
+            nn.Conv2d(6,16,kernel_size=5),
+            nn.ReLU(True))
+        self.decoder = nn.Sequential(
+            nn.ConvTranspose2d(16,6,kernel_size=5),
+            nn.ReLU(True),
+            nn.ConvTranspose2d(6,3,kernel_size=5),
+            nn.ReLU(True),
+            nn.Sigmoid())
+    def forward(self,x):
+        x = self.encoder(x)
+        x = self.decoder(x)
+        return x
 
-y_pred = KMeans(n_clusters=6, random_state=170).fit_predict(X_pca)
-print(y_pred)
-plt.scatter(X_pca[:,0],X_pca[:,1],c=y_pred)
-plt.title('PCA -> K-Means')
-plt.show()
+#defining some stuff
+num_epochs = 5
+batch_size = 128
+model = Autoencoder().cpu()
+distance = nn.MSELoss()
+optimizer = torch.optim.Adam(model.parameters(),weight_decay=1e-5)
 
