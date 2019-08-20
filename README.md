@@ -19,6 +19,8 @@ and select the "Exploring [...].ipynb" notebook. Then you'll have to change the 
 
 [O'Shea autoencoder signal identification](https://arxiv.org/pdf/1611.00303.pdf)
 
+[Unsupervised structured signal identification](https://arxiv.org/pdf/1604.07078.pdf)
+
 ## Ideas
 Fit a one-class SVM. Example...
 https://scikit-learn.org/stable/auto_examples/svm/plot_oneclass.html#sphx-glr-auto-examples-svm-plot-oneclass-py
