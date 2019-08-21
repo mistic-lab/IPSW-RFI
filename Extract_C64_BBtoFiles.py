@@ -25,8 +25,7 @@ sample_size = 4 # complex int16
 
 idx = np.argwhere(h5['features'][5,:] > 40)
 print(idx)
-print("Num to do: {}".format(len(idx)))
-#exit(1)
+print("Num with high enough power: {}".format(len(idx)))
 
 
 for i in idx: #[118]: #np.arange(0, h5['merged_detections'].shape[1]):
