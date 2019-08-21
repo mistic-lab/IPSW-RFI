@@ -21,6 +21,8 @@ and select the "Exploring [...].ipynb" notebook. Then you'll have to change the 
 
 [Unsupervised structured signal identification](https://arxiv.org/pdf/1604.07078.pdf)
 
+[Modulation identification using higher order cumulants](./docs/1-s2.0-S1874490716301094-main.pdf)
+
 ## Ideas
 Perhaps an autoencoder could work. Would need to train on a bunch of raw data. After training, we would pass new data x throught he autoencoder model and obtain f(x). If the mean-squared error distance between x and f(x) is high, then x is probably anomalous. We could then add x to the training data so that the model f could learn from the anomalies. Problem is the input data x must always be the same shape. The pro is that this could be implemented using a GPU via the PyTorch package.
 Paper: https://arxiv.org/pdf/1807.08316.pdf
