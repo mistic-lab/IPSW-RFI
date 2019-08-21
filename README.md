@@ -24,3 +24,9 @@ and select the "Exploring [...].ipynb" notebook. Then you'll have to change the 
 ## Ideas
 Perhaps an autoencoder could work. Would need to train on a bunch of raw data. After training, we would pass new data x throught he autoencoder model and obtain f(x). If the mean-squared error distance between x and f(x) is high, then x is probably anomalous. We could then add x to the training data so that the model f could learn from the anomalies. Problem is the input data x must always be the same shape. The pro is that this could be implemented using a GPU via the PyTorch package.
 Paper: https://arxiv.org/pdf/1807.08316.pdf
+
+Some good references on coding autoencoders using the PyTorch package:
+https://medium.com/@vaibhaw.vipul/building-autoencoder-in-pytorch-34052d1d280c
+https://github.com/L1aoXingyu/pytorch-beginner/tree/master/08-AutoEncoder
+
+PyTorch is a great Mahcine Learning python library. It allows for easy bakcprpogation which is needed for training. Futhermore, it enables GPU usage for faster computations. Documentation: https://pytorch.org
