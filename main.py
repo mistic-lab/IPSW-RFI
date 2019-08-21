@@ -17,7 +17,23 @@ import torch
 from torch import nn
 from torch.autograd import Variable
 
+import argparse
+parser = argparse.ArgumentParser('Train and test an autoencoder for detecting anomalous RFI')
+parser.add_argument('--batch-size', type=int, default=100, help='training batch size')
+parser.add_argument('--num-epochs', type=int, default=100, help='number of times to iterate through training data')
+parser.add_argument('--seed', type=int, default=0)
+parser.add_argument('--make-plots', type=bool, default=True, help='whether or not to plot a hitogram of reconstruction error')
 
+args = parser.parse_args()
+
+print('Arguments:')
+for p in vars(args).items():
+    print('  ',p[0]+': ',p[1])
+print('\n')
+
+# set seed
+torch.manual_seed(args.seed)
+np.random.seed(args.seed)
 
 # boolean, whether or not you have access to a GPU
 has_cuda = torch.cuda.is_available()
@@ -31,7 +47,7 @@ for filename in os.listdir('./waveforms'):
 X = torch.FloatTensor(X)
 X = X[:13936000]
 X = X.view(-1,500)
-print(X.shape)
+#print(X.shape)
 
 #normalize the data
 X = (X-X.mean(dim=-1).unsqueeze(1))/X.std(dim=-1).unsqueeze(1)
@@ -91,8 +107,8 @@ class convautoencoder(nn.Module):
         return x
 
 # number of epochs and training set batch size
-num_epochs = 100
-batch_size = 100
+num_epochs = args.num_epochs
+batch_size = args.batch_size
 
 # define the model, move it to the GPU (if available)
 model = convautoencoder()
@@ -158,15 +174,16 @@ with torch.no_grad():
         anom_losses.append(loss.item())
 print('\nAverage Adv. Loss = {}'.format(statistics.mean(anom_losses)))
 
-# make histogram
-plt.hist(train_losses, 50, density=True, facecolor='g',label='train data')
-plt.hist(test_losses, 50, density=True, facecolor='b',label='test data')
-plt.hist(anom_losses, 50, density=True, facecolor='r',label='anomalous data')
-plt.legend()
-plt.xlabel('Reconstruction Error, $||x - \hat{x}||_2^2$')
-plt.ylabel('Density (%)')
-plt.grid(True)
-plt.savefig('reconstruction_error.png')
+if args.make_plots:
+    # make histogram
+    plt.hist(train_losses, 50, density=True, facecolor='g',label='train data')
+    plt.hist(test_losses, 50, density=True, facecolor='b',label='test data')
+    plt.hist(anom_losses, 50, density=True, facecolor='r',label='anomalous data')
+    plt.legend()
+    plt.xlabel('Reconstruction Error, $||x - \hat{x}||_2^2$')
+    plt.ylabel('Density (%)')
+    plt.grid(True)
+    plt.savefig('reconstruction_error.png')
 
 
 
