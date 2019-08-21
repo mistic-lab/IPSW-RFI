@@ -31,4 +31,4 @@ Some good references on coding autoencoders using the PyTorch package:
 https://medium.com/@vaibhaw.vipul/building-autoencoder-in-pytorch-34052d1d280c
 https://github.com/L1aoXingyu/pytorch-beginner/tree/master/08-AutoEncoder
 
-PyTorch is a great Machine Learning python library. It allows for easy bakcprpogation which is needed for training. Futhermore, it enables GPU usage for faster computations. Documentation: https://pytorch.org
+PyTorch is a great Machine Learning python library. It allows for easy backpropagation which is needed for training. Futhermore, it enables GPU usage for faster computations. Documentation: https://pytorch.org
