@@ -29,16 +29,16 @@ for filename in os.listdir('./waveforms'):
     data = np.fromfile(f)
     X = np.append(X,data)
 X = torch.FloatTensor(X)
-X = X[:4398000]
+X = X[:13936000]
 X = X.view(-1,500)
-#print(X.shape)
+print(X.shape)
 
 #normalize the data
 X = (X-X.mean(dim=-1).unsqueeze(1))/X.std(dim=-1).unsqueeze(1)
 
 # obtain a training and a test set
-X_train = X[:7000]
-X_test = X[7000:]
+X_train = X[:20000]
+X_test = X[20000:]
 
 # Define a simple, Linear autoencoder
 class linearautoencoder(nn.Module):
