@@ -20,6 +20,7 @@ from torch.autograd import Variable
 import argparse
 parser = argparse.ArgumentParser('Train and test an autoencoder for detecting anomalous RFI')
 parser.add_argument('--batch-size', type=int, default=100, help='training batch size')
+parser.add_argument('--segment-size', type=int, default=500, help='size to split inputs down to')
 parser.add_argument('--num-epochs', type=int, default=100, help='number of times to iterate through training data')
 parser.add_argument('--seed', type=int, default=0)
 parser.add_argument('--make-plots', type=bool, default=True, help='whether or not to plot a hitogram of reconstruction error')
@@ -31,6 +32,12 @@ for p in vars(args).items():
     print('  ',p[0]+': ',p[1])
 print('\n')
 
+
+
+def round_down(num, divisor):
+    return num - (num%divisor)
+
+
 # set seed
 torch.manual_seed(args.seed)
 np.random.seed(args.seed)
@@ -39,29 +46,44 @@ np.random.seed(args.seed)
 has_cuda = torch.cuda.is_available()
 
 # load in the waveforms data
+segment_size = args.segment_size
 X = np.array([])
 for filename in os.listdir('./waveforms'):
     f = os.path.join('./waveforms',filename)
     data = np.fromfile(f)
-    X = np.append(X,data)
+    new_len = round_down(len(data),segment_size)
+    if new_len > 0:
+        data = data[:new_len]
+        X = np.append(X,data)
+    else:
+        print("Shorty! {} is only {} samples long.".format(filename, data.shape))
+
+if len(X) % segment_size != 0:
+    raise Exception("No way José")
 X = torch.FloatTensor(X)
-X = X[:13936000]
-X = X.view(-1,500)
+# X = X[:13936000]
+X = X.view(-1,segment_size)
 #print(X.shape)
 
 #normalize the data
 X = (X-X.mean(dim=-1).unsqueeze(1))/X.std(dim=-1).unsqueeze(1)
 
 # obtain a training and a test set
-X_train = X[:20000]
-X_test = X[20000:]
+# splitSize = round_down(len(X), segment_size)
+splitSize = round_down(20000,segment_size)
+X_train = X[:splitSize]
+X_test = X[splitSize:]
+# X_train = X[:20000]
+# X_test = X[20000:]
+print("X_train length: {}".format(len(X_train)))
+print("X_test length: {}".format(len(X_test)))
 
 # Define a simple, Linear autoencoder
 class linearautoencoder(nn.Module):
     def __init__(self):
         super(linearautoencoder, self).__init__()
         self.encoder = nn.Sequential(
-            nn.Linear(500, 128),
+            nn.Linear(segment_size, 128),
             nn.ReLU(True),
             nn.Linear(128, 64),
             nn.ReLU(True), nn.Linear(64, 12), nn.ReLU(True), nn.Linear(12, 3))
@@ -71,7 +93,7 @@ class linearautoencoder(nn.Module):
             nn.Linear(12, 64),
             nn.ReLU(True),
             nn.Linear(64, 128),
-            nn.ReLU(True), nn.Linear(128, 500))
+            nn.ReLU(True), nn.Linear(128, segment_size))
 
     def forward(self, x):
         x = self.encoder(x)
@@ -96,7 +118,7 @@ class convautoencoder(nn.Module):
             nn.ConvTranspose1d(16, 8, 5, stride=3, padding=1),
             nn.ReLU(True),
             nn.ConvTranspose1d(8, 1, 1, stride=2, padding=1),
-            nn.Linear(495,500)  # make the output the same shape as the unput
+            nn.Linear(495,segment_size)  # make the output the same shape as the unput
         )
 
     def forward(self, x):
@@ -118,13 +140,14 @@ model.train()
 
 # define the loss/distance function and the optimizer
 distance = nn.MSELoss()
-optimizer = torch.optim.Adam(model.parameters(),lr = 0.001)
+optimizer = torch.optim.Adam(model.parameters(), lr = 0.001)
 
 for epochs in range(num_epochs):
     # shuffle the rows of X_train, and group the data into batches
     Ix = torch.randperm(len(X_train))
     X_train = X_train[Ix]
-    X_train = X_train.reshape(-1,batch_size,500)
+    X_train = X_train.reshape(-1,batch_size,segment_size)
+
 
     # keep track of the losses
     train_losses = []
@@ -165,7 +188,7 @@ anom_losses = []
 m = torch.distributions.normal.Normal(torch.tensor([0.0]), torch.tensor([1.0]))
 with torch.no_grad():
     for i in range(1000):
-        x = m.sample((500,))
+        x = m.sample((segment_size,))
         x = x.view(-1).unsqueeze(0)
         if has_cuda:
             x = x.cuda()
