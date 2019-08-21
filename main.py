@@ -145,7 +145,7 @@ with torch.no_grad():
 print('\nAverage Test Loss = {}'.format(statistics.mean(test_losses)))
 
 # evaluate on randomly-generated standard-normal tensors/vectors
-adv_losses = []
+anom_losses = []
 m = torch.distributions.normal.Normal(torch.tensor([0.0]), torch.tensor([1.0]))
 with torch.no_grad():
     for i in range(1000):
@@ -155,13 +155,13 @@ with torch.no_grad():
             x = x.cuda()
         output = model(x)
         loss = distance(output,x)
-        adv_losses.append(loss.item())
-print('\nAverage Adv. Loss = {}'.format(statistics.mean(adv_losses)))
+        anom_losses.append(loss.item())
+print('\nAverage Adv. Loss = {}'.format(statistics.mean(anom_losses)))
 
 # make histogram
 plt.hist(train_losses, 50, density=True, facecolor='g',label='train data')
 plt.hist(test_losses, 50, density=True, facecolor='b',label='test data')
-plt.hist(adv_losses, 50, density=True, facecolor='r',label='random $\mathcal{N}(0,1)$ data')
+plt.hist(anom_losses, 50, density=True, facecolor='r',label='anomalous data')
 plt.legend()
 plt.xlabel('Reconstruction Error, $||x - \hat{x}||_2^2$')
 plt.ylabel('Density (%)')
