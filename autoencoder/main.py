@@ -45,18 +45,35 @@ np.random.seed(args.seed)
 # boolean, whether or not you have access to a GPU
 has_cuda = torch.cuda.is_available()
 
+# Sort through the baseband signals
+features = np.loadtxt('1565289740_features.txt')
+train_indexes = []
+anomalous_indexes = []
+for i in range(features.shape[1]):
+    if features[2,i] > -0.5 and features[2,i] < 0.5:
+        if features[3,i] > -1 and features[3,i] < 1:
+            train_indexes.append(i)
+        else:
+            anomalous_indexes.append(i)
+    else:
+        anomalous_indexes.append(i)
+
+
 # load in the waveforms data
 segment_size = args.segment_size
 X = np.array([])
-for filename in os.listdir('./waveforms'):
-    f = os.path.join('./waveforms',filename)
-    data = np.fromfile(f)
-    new_len = round_down(len(data),segment_size)
-    if new_len > 0:
-        data = data[:new_len]
-        X = np.append(X,data)
-    else:
-        print("Shorty! {} is only {} samples long.".format(filename, data.shape))
+for i in train_indexes:
+    f='./waveforms/1565289740.dat.'+str(i)+'.c64'
+# for filename in os.listdir('./waveforms'):
+#     f = os.path.join('./waveforms',filename)
+    if os.path.exists(f):
+        data = np.fromfile(f)
+        new_len = round_down(len(data),segment_size)
+        if new_len > 0:
+            data = data[:new_len]
+            X = np.append(X,data)
+        else:
+            print("Shorty! {} is only {} samples long.".format(filename, data.shape))
 
 if len(X) % segment_size != 0:
     raise Exception("No way José")
@@ -168,7 +185,7 @@ for epochs in range(num_epochs):
         optimizer.step()
     print('Epoch = {}, Average Loss = {}'.format(epochs, statistics.mean(train_losses)))
 
-# evaluate the test data
+########### Evaluate the test data
 model.eval()
 test_losses = []
 with torch.no_grad():
@@ -183,17 +200,52 @@ with torch.no_grad():
         test_losses.append(loss.item())
 print('\nAverage Test Loss = {}'.format(statistics.mean(test_losses)))
 
-# evaluate on randomly-generated standard-normal tensors/vectors
+############# Evaluate on randomly-generated standard-normal tensors/vectors
+# anom_losses = []
+# m = torch.distributions.normal.Normal(torch.tensor([0.0]), torch.tensor([1.0]))
+# with torch.no_grad():
+#     for i in range(1000):
+#         x = m.sample((segment_size,))
+#         x = x.view(-1).unsqueeze(0)
+#         if has_cuda:
+#             x = x.cuda()
+#         output = model(x)
+#         loss = distance(output,x)
+#         anom_losses.append(loss.item())
+# print('\nAverage Adv. Loss = {}'.format(statistics.mean(anom_losses)))
+
+X_anom = np.array([])
+for i in anomalous_indexes:
+    f='./waveforms/1565289740.dat.'+str(i)+'.c64'
+    if os.path.exists(f):
+        data = np.fromfile(f)
+        new_len = round_down(len(data),segment_size)
+        if new_len > 0:
+            data = data[:new_len]
+            X_anom = np.append(X_anom,data)
+        else:
+            print("Shorty! {} is only {} samples long.".format(filename, data.shape))
+
+if len(X) % segment_size != 0:
+    raise Exception("No way José")
+X_anom = torch.FloatTensor(X_anom)
+# X = X[:13936000]
+X_anom = X_anom.view(-1,segment_size)
+#print(X.shape)
+
+#normalize the data
+X_anom = (X_anom-X_anom.mean(dim=-1).unsqueeze(1))/X_anom.std(dim=-1).unsqueeze(1)
+
 anom_losses = []
-m = torch.distributions.normal.Normal(torch.tensor([0.0]), torch.tensor([1.0]))
 with torch.no_grad():
-    for i in range(1000):
-        x = m.sample((segment_size,))
-        x = x.view(-1).unsqueeze(0)
+    for i, x in enumerate(X_test):
+        x = x.unsqueeze(0)
         if has_cuda:
             x = x.cuda()
         output = model(x)
         loss = distance(output,x)
+        if math.isnan(loss.item()):
+            raise ValueError('got nan loss')
         anom_losses.append(loss.item())
 print('\nAverage Adv. Loss = {}'.format(statistics.mean(anom_losses)))
 
