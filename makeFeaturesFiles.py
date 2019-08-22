@@ -7,7 +7,7 @@ import os
 parser = argparse.ArgumentParser()
 parser.add_argument("h5", help="HDF5 File to parse.")
 parser.add_argument("BBdir", help="Directory of basebands")
-parser.add_argument("npy", help="output numpy file")
+# parser.add_argument("npy", help="output numpy file")
 args = parser.parse_args()
 
 
@@ -27,7 +27,9 @@ def getFilesByExt(path, ext, verbose=False):
 
 with h5py.File(args.h5, 'r') as parent:
     
+    # root, dir, parentFileName = os.walk(args.h5)
     parentName, ext = str(args.h5).rsplit('.')
+    print("Parent name: {}".format(parentName))
     if ext != 'h5':
         raise Exception("Wrong parent file type")
     
@@ -36,9 +38,19 @@ with h5py.File(args.h5, 'r') as parent:
     indexes = []
 
     for f in bbFiles:
-        parentName2, ext, index, c64 = f.rsplit(".")
+        # print(f)
+        head, tail = os.path.split(f)
+        parentName2, ext, index, c64 = tail.rsplit(".")
         indexes.append(int(index))
         if parentName != parentName2:
             raise Exception("Y'all messed up! Ha Ha!")
     
-    output = np.ndarray(shape)
+    # indexes now contains all the indexes for the available baseband signals
+    print(parent['features'].shape)
+    output=np.ndarray((parent['features'].shape[0], max(indexes)+1))
+
+    for i in indexes:
+        output[:,i] = parent['features'][:,i]
+
+    print(output.shape)
+    np.savetxt(parentName+'_features.txt', output)
