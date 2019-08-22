@@ -88,8 +88,11 @@ def main(file_name):
         newboxes.append([np.min(new[:,0]), np.min(new[:,1]), np.max(new[:,2]), np.max(new[:,3])])
     newboxes = np.transpose(np.asarray(newboxes))
     print(newboxes.shape)
-    merged = h5.create_dataset("merged_detections", newboxes.shape, dtype="float32")
-    merged[:,:] = newboxes
+    if newboxes.shape[0] != 0:
+        merged = h5.create_dataset("merged_detections", newboxes.shape, dtype="float32")
+        merged[:,:] = newboxes
+    else:
+        del h5['merged_detections']
 
     h5.close()  
         
