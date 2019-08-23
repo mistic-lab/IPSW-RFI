@@ -8,6 +8,7 @@ parser.add_argument("csv", help="csv file to display")
 parser.add_argument("--renderer", default='browser', help="Directory of basebands")
 parser.add_argument("--colorKey", default="", help="key of item to usr for color")
 parser.add_argument("--colorscale", default="rdylbu", help="colorscale to use if colorKey is set")
+parser.add_argument("--backgroundcolor", default="grey", help="background color")
 args = parser.parse_args()
 
 df = pd.read_csv(args.csv)
@@ -37,8 +38,8 @@ fig = go.Figure(
 )
 
 fig.update_layout(
-    plot_bgcolor = 'grey',
-    paper_bgcolor = 'grey'
+    plot_bgcolor = args.backgroundcolor,
+    paper_bgcolor = args.backgroundcolor
 )
 
 fig.show(renderer=args.renderer)
