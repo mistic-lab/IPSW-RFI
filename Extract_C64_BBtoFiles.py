@@ -5,6 +5,7 @@ import numpy as np
 from scipy.signal import lfilter, remez, freqz, spectrogram
 import matplotlib.pyplot as plt
 import os
+from pathlib import Path
 
 # parser = argparse.ArgumentParser()
 # parser.add_argument("h5", help="HDF5 File to parse.")
@@ -12,14 +13,15 @@ import os
 # args = parser.parse_args()
 
 fileroots = [
-'/media/nsbruce/Backup Plus/460MHz/1565289740',  '/media/nsbruce/Backup Plus/460MHz/1565292314',  '/media/nsbruce/Backup Plus/460MHz/1565294703',  '/media/nsbruce/Backup Plus/460MHz/1565297086',
-'/media/nsbruce/Backup Plus/460MHz/1565290032',  '/media/nsbruce/Backup Plus/460MHz/1565292618',  '/media/nsbruce/Backup Plus/460MHz/1565294998',  '/media/nsbruce/Backup Plus/460MHz/1565297386',
-'/media/nsbruce/Backup Plus/460MHz/1565290425',  '/media/nsbruce/Backup Plus/460MHz/1565292921',  '/media/nsbruce/Backup Plus/460MHz/1565295293',  '/media/nsbruce/Backup Plus/460MHz/1565297744',
-'/media/nsbruce/Backup Plus/460MHz/1565290811',  '/media/nsbruce/Backup Plus/460MHz/1565293225',  '/media/nsbruce/Backup Plus/460MHz/1565295592',  '/media/nsbruce/Backup Plus/460MHz/1565298142',
-'/media/nsbruce/Backup Plus/460MHz/1565291105',  '/media/nsbruce/Backup Plus/460MHz/1565293518',  '/media/nsbruce/Backup Plus/460MHz/1565295890',  '/media/nsbruce/Backup Plus/460MHz/1565298448',
-'/media/nsbruce/Backup Plus/460MHz/1565291410',  '/media/nsbruce/Backup Plus/460MHz/1565293815',  '/media/nsbruce/Backup Plus/460MHz/1565296189',  '/media/nsbruce/Backup Plus/460MHz/1565298746',
-'/media/nsbruce/Backup Plus/460MHz/1565291711',  '/media/nsbruce/Backup Plus/460MHz/1565294109',  '/media/nsbruce/Backup Plus/460MHz/1565296488',
-'/media/nsbruce/Backup Plus/460MHz/1565292014',  '/media/nsbruce/Backup Plus/460MHz/1565294405',  '/media/nsbruce/Backup Plus/460MHz/1565296786'
+'/Volumes/Backup Plus/460MHz/1565289740',  '/Volumes/Backup Plus/460MHz/1565292314',  '/Volumes/Backup Plus/460MHz/1565294703',  '/Volumes/Backup Plus/460MHz/1565297086',
+'/Volumes/Backup Plus/460MHz/1565290032',  '/Volumes/Backup Plus/460MHz/1565292618',  '/Volumes/Backup Plus/460MHz/1565294998',  '/Volumes/Backup Plus/460MHz/1565297386',
+'/Volumes/Backup Plus/460MHz/1565290425',  '/Volumes/Backup Plus/460MHz/1565292921',  '/Volumes/Backup Plus/460MHz/1565295293',  '/Volumes/Backup Plus/460MHz/1565297744',
+'/Volumes/Backup Plus/460MHz/1565290811',  '/Volumes/Backup Plus/460MHz/1565293225',  '/Volumes/Backup Plus/460MHz/1565295592',
+# '/Volumes/Backup Plus/460MHz/1565298142',
+'/Volumes/Backup Plus/460MHz/1565291105',  '/Volumes/Backup Plus/460MHz/1565293518',  '/Volumes/Backup Plus/460MHz/1565295890',  '/Volumes/Backup Plus/460MHz/1565298448',
+'/Volumes/Backup Plus/460MHz/1565291410',  '/Volumes/Backup Plus/460MHz/1565293815',  '/Volumes/Backup Plus/460MHz/1565296189',  '/Volumes/Backup Plus/460MHz/1565298746',
+'/Volumes/Backup Plus/460MHz/1565291711',  '/Volumes/Backup Plus/460MHz/1565294109',  '/Volumes/Backup Plus/460MHz/1565296488',
+'/Volumes/Backup Plus/460MHz/1565292014',  '/Volumes/Backup Plus/460MHz/1565294405',  '/Volumes/Backup Plus/460MHz/1565296786'
 ]
 
 for fr in fileroots:
@@ -40,6 +42,14 @@ for fr in fileroots:
             print("Num of merged detections to extract: {}".format(h5['merged_detections'].shape[1]))
 
             for i in range(h5['merged_detections'].shape[1]): #[118]: #np.arange(0, h5['merged_detections'].shape[1]):
+
+                f_out = os.path.basename(rawName)
+                current_file = Path('/Volumes/Backup Plus/460MHz/waveforms/'+f_out + '.%d' %(i) + '.c64')
+
+                if current_file.exists():
+                    print("{} already exists".format(f_out + '.%d'%(i)+'.c64'))
+                    continue
+
                 
                 print("Extracting {}/{}".format(i,h5['merged_detections'].shape[1]))
                 
@@ -113,7 +123,6 @@ for fr in fileroots:
                 x *= np.exp(-2.0j*np.pi*centroid*np.arange(len(x)))
                 x -= np.mean(x)
 
-                f_out = os.path.basename(rawName)
 
-                x.astype(np.complex64).tofile('/media/nsbruce/Backup Plus/460MHz/waveforms/'+f_out + '.%d' %(i) + '.c64')
+                x.astype(np.complex64).tofile('/Volumes/Backup Plus/460MHz/waveforms/'+f_out + '.%d' %(i) + '.c64')
 
